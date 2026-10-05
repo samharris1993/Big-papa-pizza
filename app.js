@@ -115,56 +115,64 @@ document.getElementById("checkoutForm").addEventListener("submit", async e=>{
     return;
   }
 
+  const submitButton = e.target.querySelector('button[type="submit"]');
+  const oldText = submitButton.textContent;
+  submitButton.disabled = true;
+  submitButton.textContent = "Sending order...";
+
   const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const email = document.getElementById("email").value.trim();
   const requestedTime = document.getElementById("time").value;
   const address = document.getElementById("address").value.trim();
   const notes = document.getElementById("notes").value.trim();
+  const ref = `BP${Date.now().toString().slice(-6)}`;
 
-  if(orderType === "Delivery" && !address){
-    alert("Please enter a delivery address.");
-    return;
-  }
+  const itemSummary = cart
+    .map(i => `${i.qty} × ${i.name} @ ${money(i.price)} = ${money(i.price*i.qty)}`)
+    .join("
+");
 
-  const submitButton = e.target.querySelector('button[type="submit"]');
-  const oldText = submitButton.textContent;
-  submitButton.disabled = true;
-  submitButton.textContent = "Opening secure payment...";
-
-  const orderRef = `BP${Date.now().toString().slice(-6)}`;
+  const payload = new URLSearchParams({
+    "form-name": "pizza-orders",
+    "order_reference": ref,
+    "customer_name": name,
+    "phone": phone,
+    "email": email,
+    "order_type": orderType,
+    "requested_time": requestedTime,
+    "address": orderType === "Delivery" ? address : "Collection",
+    "notes": notes || "None",
+    "order_items": itemSummary,
+    "order_total": money(total())
+  });
 
   try {
-    const response = await fetch("/.netlify/functions/create-checkout-session", {
+    const response = await fetch("/", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        items: cart.map(i => ({id:i.id, qty:i.qty})),
-        orderType,
-        orderRef,
-        name,
-        phone,
-        email,
-        requestedTime,
-        address,
-        notes
-      })
+      headers: {"Content-Type": "application/x-www-form-urlencoded"},
+      body: payload.toString()
     });
 
-    const data = await response.json();
-    if(!response.ok || !data.url){
-      throw new Error(data.error || "Could not start payment.");
-    }
+    if(!response.ok) throw new Error("Order submission failed");
 
-    localStorage.setItem("bigPapaPendingOrder", JSON.stringify({
-      ref: orderRef,
-      items: cart,
-      orderType
-    }));
+    document.getElementById("confirmationText").innerHTML =
+      `Thanks <strong>${name}</strong>. Your ${orderType.toLowerCase()} order has been sent.<br><br>` +
+      `Order reference: <strong>${ref}</strong><br>` +
+      `${cart.map(i=>`${i.qty}× ${i.name}`).join(", ")}<br>` +
+      `<strong>Total: ${money(total())}</strong>`;
 
-    window.location.href = data.url;
+    document.getElementById("confirmation").showModal();
+    cart = [];
+    renderCart();
+    e.target.reset();
+    orderType = "Collection";
+    document.querySelectorAll(".seg").forEach(b=>b.classList.toggle("active", b.dataset.type==="Collection"));
+    document.getElementById("deliveryFields").classList.add("hidden");
+    document.getElementById("orderTypeNote").textContent = "Collection selected.";
   } catch(err) {
-    alert(err.message || "Sorry, we couldn't start the payment.");
+    alert("Sorry, we couldn't send your order. Please try again.");
+  } finally {
     submitButton.disabled = false;
     submitButton.textContent = oldText;
   }
@@ -177,10 +185,4 @@ renderCart();
 
 if("serviceWorker" in navigator){
   window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));
-}
-
-
-const params = new URLSearchParams(window.location.search);
-if(params.get("payment") === "cancelled"){
-  setTimeout(() => alert("Payment was cancelled. Your basket is still here if you want to try again."), 250);
 }
