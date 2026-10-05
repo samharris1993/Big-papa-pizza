@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#b4211f">
+<title>Payment Successful — Big Papa Pizza</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.success-wrap{max-width:720px;margin:0 auto;padding:40px 18px 70px}
+.success-card{background:var(--paper);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:30px;text-align:center}
+.success-logo{width:100px;height:100px;border-radius:22px;object-fit:cover;margin-bottom:16px}
+.success-check{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;margin:0 auto 18px;background:var(--green);color:white;font-size:38px;font-weight:900}
+.order-summary{text-align:left;background:#f6efe3;border-radius:18px;padding:18px;margin:22px 0}
+.order-summary .line{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid #e5d7c5}
+.order-summary .line:last-child{border-bottom:0}
+</style>
+</head>
+<body>
+  <main class="success-wrap">
+    <div class="success-card">
+      <img src="big-papa-logo.jpeg" class="success-logo" alt="Big Papa Pizza">
+      <div class="success-check">✓</div>
+      <h1>Payment received</h1>
+      <p class="muted" id="statusText">Checking your payment…</p>
+      <div class="order-summary" id="summary" hidden></div>
+      <a class="primary" style="display:inline-block;text-decoration:none" href="/">Back to menu</a>
+    </div>
+  </main>
+
+<script>
+const money = (p, c="gbp") => new Intl.NumberFormat("en-GB",{style:"currency",currency:c.toUpperCase()}).format((p||0)/100);
+const sessionId = new URLSearchParams(location.search).get("session_id");
+const status = document.getElementById("statusText");
+const summary = document.getElementById("summary");
+
+(async()=>{
+  if(!sessionId){ status.textContent="We couldn't find your payment reference."; return; }
+  try{
+    const res = await fetch("/.netlify/functions/get-checkout-session?session_id="+encodeURIComponent(sessionId));
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || "Unable to verify payment.");
+
+    if(data.paid){
+      status.innerHTML = `Thanks <strong>${data.customer_name || ""}</strong>. Your order is paid and confirmed.<br>Order reference: <strong>${data.order_reference || ""}</strong>`;
+      summary.hidden = false;
+      summary.innerHTML =
+        `<div class="line"><span>Order type</span><strong>${data.order_type || ""}</strong></div>` +
+        `<div class="line"><span>Requested time</span><strong>${data.requested_time || "ASAP"}</strong></div>` +
+        (data.items || []).map(x => `<div class="line"><span>${x.quantity} × ${x.description}</span><strong>${money(x.amount_total,data.currency)}</strong></div>`).join("") +
+        `<div class="line"><span>Total paid</span><strong>${money(data.amount_total,data.currency)}</strong></div>`;
+      localStorage.removeItem("bigPapaPendingOrder");
+    }else{
+      status.textContent="Your payment has not completed yet. Please check again shortly.";
+    }
+  }catch(e){
+    status.textContent=e.message;
+  }
+})();
+</script>
+</body>
+</html>

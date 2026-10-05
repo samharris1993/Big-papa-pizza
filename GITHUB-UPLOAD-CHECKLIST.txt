@@ -1,0 +1,27 @@
+BIG PAPA PIZZA — GITHUB UPLOAD CHECKLIST
+
+At the ROOT of the GitHub repository you should see:
+
+index.html
+success.html
+app.js
+styles.css
+package.json
+netlify.toml
+manifest.json
+service-worker.js
+big-papa-logo.jpeg
+margarita.jpg
+pepperoni.jpg
+pepperoni-crumble.jpg
+pepper-honey.jpg
+hot-honey.jpg
+fully-loaded.jpg
+netlify/functions/create-checkout-session.js
+netlify/functions/get-checkout-session.js
+netlify/functions/stripe-webhook.js
+
+DO NOT upload:
+.env
+Any Stripe secret key
+Any webhook secret

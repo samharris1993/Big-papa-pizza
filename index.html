@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#b4211f" />
+  <title>Big Papa Pizza</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <img class="logo" src="big-papa-logo.jpeg" alt="Big Papa Pizza logo">
+      <div>
+        <h1>Big Papa Pizza</h1>
+        <p>Hand stretched dough · Home made dough · Fresh ingredients</p>
+      </div>
+      <button class="cart-button" id="openCart">Cart <span id="cartCount">0</span></button>
+    </div>
+  </header>
+
+  <main>
+    <section class="order-type card">
+      <h2>How would you like your order?</h2>
+      <div class="segmented">
+        <button class="seg active" data-type="Collection">Collection</button>
+        <button class="seg" data-type="Delivery">Delivery</button>
+      </div>
+      <p class="muted" id="orderTypeNote">Collection selected.</p>
+    </section>
+
+    <section>
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">OUR PIZZAS</span>
+          <h2>Choose your favourites</h2>
+        </div>
+      </div>
+
+      <div class="menu-grid" id="menuGrid"></div>
+    </section>
+
+    <section class="checkout card">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">CHECKOUT</span>
+          <h2>Your details</h2><p class="muted">Place your order below, then pay securely by card or Apple Pay where available.</p>
+        </div>
+      </div>
+
+      <form id="checkoutForm">
+        <div class="field-grid">
+          <label>
+            Name
+            <input required id="name" placeholder="Sam">
+          </label>
+          <label>
+            Mobile
+            <input required id="phone" inputmode="tel" placeholder="07...">
+          </label>
+          <label>
+            Email
+            <input id="email" type="email" placeholder="you@example.com">
+          </label>
+          <label>
+            Requested time
+            <select id="time">
+              <option>ASAP</option>
+              <option>In 30 minutes</option>
+              <option>In 45 minutes</option>
+              <option>In 60 minutes</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="deliveryFields" class="hidden">
+          <label>
+            Delivery address
+            <textarea id="address" rows="3" placeholder="House number, street, postcode"></textarea>
+          </label>
+        </div>
+
+        <label>
+          Order notes
+          <textarea id="notes" rows="3" placeholder="Any notes for the kitchen?"></textarea>
+        </label>
+
+        <div class="checkout-total">
+          <div>
+            <span class="muted">Order total</span>
+            <strong id="checkoutTotal">£0.00</strong>
+          </div>
+          <button class="primary" type="submit">Continue to secure payment</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-hidden="true">
+    <div class="cart-head">
+      <div>
+        <span class="eyebrow">YOUR ORDER</span>
+        <h2>Cart</h2>
+      </div>
+      <button class="icon-button" id="closeCart" aria-label="Close cart">×</button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-footer">
+      <div class="row"><span>Subtotal</span><strong id="subtotal">£0.00</strong></div>
+      <div class="row muted"><span>Order type</span><span id="cartOrderType">Collection</span></div>
+      <div class="row total"><span>Total</span><strong id="cartTotal">£0.00</strong></div>
+      <button class="primary wide" id="goCheckout">Go to checkout</button>
+    </div>
+  </aside>
+
+  <dialog id="confirmation">
+    <div class="confirmation">
+      <div class="check">✓</div>
+      <h2>Order received</h2>
+      <p id="confirmationText"></p>
+      <button class="primary" id="closeConfirmation">Done</button>
+    </div>
+  </dialog>
+
+  
+  <form name="pizza-orders" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input type="hidden" name="form-name" value="pizza-orders">
+    <input name="bot-field">
+    <input name="order_reference">
+    <input name="customer_name">
+    <input name="phone">
+    <input name="email">
+    <input name="order_type">
+    <input name="requested_time">
+    <input name="address">
+    <input name="notes">
+    <input name="order_items">
+    <input name="order_total">
+  </form>
+
+  <script src="app.js"></script>
+</body>
+</html>
