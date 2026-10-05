@@ -130,8 +130,7 @@ document.getElementById("checkoutForm").addEventListener("submit", async e=>{
 
   const itemSummary = cart
     .map(i => `${i.qty} × ${i.name} @ ${money(i.price)} = ${money(i.price*i.qty)}`)
-    .join("
-");
+    .join("\n");
 
   const payload = new URLSearchParams({
     "form-name": "pizza-orders",

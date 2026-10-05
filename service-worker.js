@@ -1,4 +1,4 @@
-const CACHE='big-papa-v6-send-to-kitchen';
+const CACHE='big-papa-v6-menu-fix';
 const ASSETS=['./','index.html','styles.css','app.js','manifest.json','big-papa-logo.jpeg','icon-192.png','icon-512.png','margarita.jpg','pepperoni.jpg','pepperoni-crumble.jpg','pepper-honey.jpg','hot-honey.jpg','fully-loaded.jpg'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)))});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
